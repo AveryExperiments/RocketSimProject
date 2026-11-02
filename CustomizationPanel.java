@@ -2,7 +2,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
+import java.awt.RenderingHints; //test
 import javax.swing.JComponent;
 
 class CustomizationPanel extends JComponent {
