@@ -23,10 +23,25 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.Timer;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.UIManager.LookAndFeelInfo;
 
 public class Main {
 
     public static void main(String[] args) {
+        try
+        {
+              UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+      
+        }
+        catch(Exception e)
+        {
+            System.out.println(e);
+        }
+        UIManager.put("Button.background", Color.decode("#A6E1FA"));
+        // updateUI();
+        
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("rocket sim");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -44,13 +59,13 @@ public class Main {
                     super.paintComponent(g);
                     Graphics2D g2 = (Graphics2D) g.create();
                     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                    g2.setColor(new Color(42, 44, 52));
+                    g2.setColor(Color.decode("#00072d"));
                     g2.fillRect(0, 0, getWidth(), getHeight());
                     g2.dispose();
                 }
             };
             homeScreen.setLayout(null);
-            homeScreen.setBackground(new Color(0, 0, 0, 0));
+            // homeScreen.setBackground(new Color(0, 0, 0, 0));
             homeScreen.setBounds(0, 0, 1000, 1000);
             panel.add(homeScreen);
 
@@ -76,11 +91,10 @@ public class Main {
             title.setBounds(120, 720, 780, 200);
             title.setHorizontalAlignment(JLabel.CENTER);
             homeScreen.add(title);
-
+            
             JButton startButton = new JButton("Start Simulator");
             startButton.setBounds(390, 500, 220, 60);
-            startButton.setBackground(new Color(244, 232, 255));
-            startButton.setForeground(new Color(45, 45, 60));
+// 
             startButton.setFont(new Font("SansSerif", Font.BOLD, 18));
             startButton.setFocusPainted(false);
             startButton.setBorderPainted(false);
