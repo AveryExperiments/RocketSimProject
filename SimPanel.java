@@ -78,14 +78,16 @@ class SimPanel extends JComponent {
 
     public void drawBg(Graphics g) {
         Color prev = g.getColor();
-        g.setColor(new Color(34, 139, 34)); // green ground
-        g.fillRect(0, 850, 1000, 150);
-
+        int groundY = Math.max(220, getHeight() - 220);
+        int groundHeight = Math.max(80, getHeight() - groundY);
+        g.setColor(new Color(34, 139, 34));
+        g.fillRect(0, groundY, getWidth(), groundHeight);
+        g.setColor(new Color(37, 66, 95));
+        g.fillRect(0, 0, getWidth(), groundY);
         g.setColor(prev);
     }
 
     public void drawArrow(int x, int y, int length, int width, int angle) {
-        System.out.println("drawing arrow");
         int y2 = (int) (y + length * Math.cos(Math.toRadians(angle + 90)));
         int x2 = (int) (x + length * Math.sin(Math.toRadians(angle + 90)));
         g2.drawLine(x, y, x2, y2);
@@ -108,24 +110,21 @@ class SimPanel extends JComponent {
         int xDos = (int) ((pointsPrime[2][0] - pointsPrime[0][0]) * Math.cos(Math.toRadians(rotAngle)) - (pointsPrime[2][1] - pointsPrime[0][1]) * Math.sin(Math.toRadians(rotAngle)) + pointsPrime[0][0]);
         int y1 = (int) ((pointsPrime[1][1] - pointsPrime[0][1]) * Math.cos(Math.toRadians(rotAngle)) + (pointsPrime[1][0] - pointsPrime[0][0]) * Math.sin(Math.toRadians(rotAngle)) + pointsPrime[0][1]);
         int yDos = (int) ((pointsPrime[2][1] - pointsPrime[0][1]) * Math.cos(Math.toRadians(rotAngle)) + (pointsPrime[2][0] - pointsPrime[0][0]) * Math.sin(Math.toRadians(rotAngle)) + pointsPrime[0][1]);
-        System.out.println("angle: " + angle + " x1: " + x1 + " y1: " + y1 + " xDos: " + xDos + " yDos: " + yDos);
 
         g2.fillPolygon(new int[]{pointsPrime[0][0], x1, xDos}, new int[]{pointsPrime[0][1], y1, yDos}, 3);
     }
 
     public void axesDisplay(Graphics g) {
-        int xOrigin = 50;
-        int yOrigin = 850;
-        int xEnd = 950;
-        int yTop = 100;
+        int xOrigin = 60;
+        int yOrigin = Math.max(180, getHeight() - 220);
+        int xEnd = getWidth() - 60;
+        int yTop = 60;
         int markWidth = 6;
-        markDist = 50;
+        int markDist = Math.max(30, Math.min(50, (xEnd - xOrigin) / 14));
 
-        // Axes lines
         g.drawLine(xOrigin, yOrigin, xEnd, yOrigin);
         g.drawLine(xOrigin, yTop, xOrigin, yOrigin);
 
-        // X-Axis tick marks and numbers
         int curNumber = 0;
         for (int i = xOrigin; i <= xEnd; i += markDist) {
             g.drawLine(i, yOrigin, i, yOrigin + markWidth);
@@ -133,7 +132,6 @@ class SimPanel extends JComponent {
             curNumber += markDist;
         }
 
-        // Y-Axis tick marks and numbers
         curNumber = 0;
         for (int j = yOrigin; j >= yTop; j -= markDist) {
             g.drawLine(xOrigin - markWidth, j, xOrigin, j);
