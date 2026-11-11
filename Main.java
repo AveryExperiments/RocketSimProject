@@ -1,6 +1,7 @@
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.geom.RoundRectangle2D;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
@@ -31,6 +32,99 @@ import javax.swing.border.Border;
 import javax.swing.UIManager.LookAndFeelInfo;
 
 public class Main {
+
+    private static ImageIcon buildCustomRocketIcon(RocketMaker maker) {
+        if (maker == null) {
+            return new ImageIcon(new BufferedImage(120, 160, BufferedImage.TYPE_INT_ARGB));
+        }
+
+        int width = 150;
+        int height = 220;
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = image.createGraphics();
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        double bodyLength = Math.max(0.10, maker.getBodyLength());
+        double bodyDiameter = Math.max(0.015, maker.getBodyDiameter());
+        double noseLength = maker.noseConeType != null ? maker.noseConeType.getLength() : 0.02;
+        double engineLength = maker.engineType != null ? maker.engineType.length : 0.05;
+        double finLen = maker.finType != null ? maker.finType.getH1() * maker.getFinSizeScale() * maker.getFinLengthScale() : 0.05;
+        double finBase = maker.finType != null ? maker.finType.getBaseWidth() * maker.getFinSizeScale() : 0.04;
+
+        double rocketLength = bodyLength + noseLength + engineLength + (finLen * 0.75);
+        double rocketWidth = Math.max(bodyDiameter, finBase * 1.5);
+
+        double scaleX = (width * 0.48) / Math.max(rocketWidth * 1500.0, 0.05);
+        double scaleY = (height * 0.62) / Math.max(rocketLength * 1200.0, 0.30);
+        double scale = Math.min(scaleX, scaleY);
+        if (scale <= 0.0 || Double.isNaN(scale) || Double.isInfinite(scale)) {
+            scale = 1.0;
+        }
+
+        int cx = width / 2;
+        int bodyW = (int) Math.max(18, bodyDiameter * 1700.0 * scale);
+        int bodyH = (int) Math.max(36, bodyLength * 950.0 * scale);
+        int noseH = (int) Math.max(16, noseLength * 850.0 * scale);
+        int engineH = (int) Math.max(10, engineLength * 450.0 * scale);
+        int finLenPx = (int) Math.max(10, finLen * 1100.0 * scale);
+        int finBasePx = (int) Math.max(7, finBase * 500.0 * scale);
+
+        int noseTop = 24;
+        int bodyY = noseTop + noseH;
+        int engineY = bodyY + bodyH;
+
+        g2.setColor(new Color(220, 240, 255));
+        if (maker.noseConeType != null) {
+            int noseBaseY = noseTop + noseH;
+            int[] x = {cx, cx - bodyW / 2, cx + bodyW / 2};
+            int[] y = {noseTop, noseBaseY, noseBaseY};
+            g2.fillPolygon(x, y, 3);
+        }
+
+        g2.setColor(new Color(200, 225, 245));
+        g2.fillRoundRect(cx - bodyW / 2, bodyY, bodyW, bodyH, 18, 18);
+
+        g2.setColor(new Color(120, 130, 180));
+        if (maker.finType != null) {
+            int finY = bodyY + bodyH - 4;
+            int leftX1 = cx - bodyW / 2;
+            int leftX2 = cx - bodyW / 2 - finLenPx;
+            int rightX1 = cx + bodyW / 2;
+            int rightX2 = cx + bodyW / 2 + finLenPx;
+
+            if (maker.finType == CustomConstants.finType.RECTANGLE) {
+                int[] leftX = {leftX1, leftX1, leftX2, leftX2};
+                int[] leftY = {finY, finY + finBasePx, finY + finBasePx, finY};
+                g2.fillPolygon(leftX, leftY, 4);
+
+                int[] rightX = {rightX1, rightX1, rightX2, rightX2};
+                int[] rightY = {finY, finY + finBasePx, finY + finBasePx, finY};
+                g2.fillPolygon(rightX, rightY, 4);
+            } else {
+                int[] leftX = {leftX1, leftX1, leftX2, leftX1 - finLenPx / 3};
+                int[] leftY = {finY, finY + finBasePx, finY + finBasePx / 2, finY + finBasePx / 3};
+                g2.fillPolygon(leftX, leftY, 4);
+
+                int[] rightX = {rightX1, rightX1, rightX2, rightX1 + finLenPx / 3};
+                int[] rightY = {finY, finY + finBasePx, finY + finBasePx / 2, finY + finBasePx / 3};
+                g2.fillPolygon(rightX, rightY, 4);
+            }
+        }
+
+        if (maker.engineType != null) {
+            g2.setColor(new Color(255, 140, 60));
+            g2.fillRoundRect(cx - 10, engineY, 20, engineH, 10, 10);
+            g2.setColor(new Color(255, 180, 120));
+            g2.fillRoundRect(cx - 7, engineY + 3, 14, Math.max(6, engineH - 6), 8, 8);
+        }
+
+        g2.setColor(new Color(40, 80, 140));
+        g2.drawRoundRect(cx - bodyW / 2, bodyY, bodyW, bodyH, 18, 18);
+        g2.drawPolygon(new int[]{cx, cx - bodyW / 2, cx + bodyW / 2}, new int[]{noseTop, noseTop + noseH, noseTop + noseH}, 3);
+
+        g2.dispose();
+        return new ImageIcon(image);
+    }
 
     private static RoundButton styleRoundedButton(String text) {
         return styleRoundedButton(text, new Color(166, 225, 250), new Color(25, 25, 35), 18);
@@ -85,7 +179,9 @@ public class Main {
         {
             System.out.println(e);
         }
-        UIManager.put("Button.background", Color.decode("#A6E1FA"));
+        UIManager.put("Button.background", new Color(0, 0, 0, 0));
+        UIManager.put("Button.foreground", new Color(25, 25, 35));
+        UIManager.put("Panel.background", Color.decode("#00072d"));
         // updateUI();
         
         SwingUtilities.invokeLater(() -> {
@@ -129,67 +225,29 @@ for (int i = 0; i < STAR_COUNT; i++) {
                 }
             };
 
-            // JPanel stars =new JPanel()
-            // {
-            //     @Override
-            //     protected void paintComponent(Graphics g) {
-            //         super.paintComponent(g);
-            //         Graphics2D g2 = (Graphics2D) g.create();
-            //         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            //         g2.setColor(Color.WHITE);
-            //         for (int i = 0; i < 100; i++) {
-            //             int x = (int) (Math.random() * getWidth());
-            //             int y = (int) (Math.random() * getHeight());
-            //             g2.fillOval(x, y, 2, 2);
-            //         }
-            //         g2.dispose();
-            //     } 
-            //     public void repaint(Graphics g) {
-            //         paintComponent(g);
-            //     }              
-            // };
-
             homeScreen.setLayout(new GridBagLayout());
             homeScreen.setBackground(new Color(0));
             homeScreen.setVisible(true);
             panel.add(homeScreen, BorderLayout.CENTER);
-            // stars.setOpaque(false);
             GridBagConstraints gbc = new GridBagConstraints();
             gbc.gridx = 0;
             gbc.gridy = 0;
             gbc.insets = new Insets(20, 0, 30, 0);
-            // frame.add(stars, BorderLayout.CENTER);
 
             JLabel titleImage = null;
             if (new java.io.File("Assets/Title.png").exists()) {
                 ImageIcon titleIcon = new ImageIcon("Assets/Title.png");
-                // Image scaledTitle = titleIcon.getImage().getScaledInstance(, 180, Image.SCALE_SMOOTH);
                 titleImage = new JLabel(new ImageIcon(titleIcon.getImage().getScaledInstance(titleIcon.getIconWidth()/2, titleIcon.getIconHeight()/2, Image.SCALE_SMOOTH)));
-                // titleImageGlow = new JLabel(new ImageIcon(titleIcon.getImage().getScaledInstance(titleIcon.getIconWidth()*2, titleIcon.getIconHeight()*2, Image.SCALE_SMOOTH)));
                 titleImage.setHorizontalAlignment(JLabel.CENTER);
                 titleImage.setVisible(true);
                 homeScreen.add(titleImage, gbc);
             }
-            Timer timer = new Timer(40, e -> homeScreen.repaint()
-            );
-                        timer.start();
+            Timer timer = new Timer(40, e -> homeScreen.repaint());
+            timer.start();
 
             gbc.gridy = 1;
             gbc.insets = new Insets(0, 0, 0, 0);
 
-            // JLabel titleGlow = new JLabel("Rocket Simulator");
-            // titleGlow.setForeground(new Color(220, 210, 255, 120));
-            // titleGlow.setFont(new Font("Serif", Font.BOLD, 62));
-            // titleGlow.setBounds(130, 730, 780, 200);
-            // titleGlow.setHorizontalAlignment(JLabel.CENTER);
-            // homeScreen.add(titleGlow);
-
-                // JLabel title = new JLabel("Rocket Simulator");
-            // title.setForeground(new Color(245, 240, 255));
-            // title.setFont(new Font("Serif", Font.BOLD, 60));
-            // title.setBounds(120, 720, 780, 200);
-            // title.setHorizontalAlignment(JLabel.CENTER);
-            // homeScreen.add(title);
             ImageIcon starButtonDefault= new ImageIcon("C:\\Users\\awart\\Desktop\\rocket\\Assets\\starbutton (1).png");
             int width= starButtonDefault.getIconWidth()/5 ;
             int height= starButtonDefault.getIconHeight()/5;
@@ -201,22 +259,18 @@ for (int i = 0; i < STAR_COUNT; i++) {
 
             startButton.setPreferredSize(new java.awt.Dimension(300, 300));
             startButton.setRolloverIcon(scaledStarButtonHover);
-            // homeScreen.setComponentZOrder(startButton, 0);
             startButton.setFont(new Font("Impact", Font.BOLD, 70));
             startButton.setForeground(new Color(245, 240, 255));
-            // startButton.setFocusPainted(false);
-            startButton.setBorderPainted(false);
-            // startButton.setOpaque(false);
             startButton.setBorderPainted(false);
             startButton.setContentAreaFilled(false);
             startButton.setFocusPainted(false);
             startButton.setFocusable(false);
-            startButton.setContentAreaFilled(false);
+            startButton.setOpaque(false);
+            startButton.setBackground(new Color(0, 0, 0, 0));
+            startButton.setBorder(BorderFactory.createEmptyBorder());
+            startButton.setMargin(new Insets(0, 0, 0, 0));
             startButton.setHorizontalTextPosition(SwingConstants.CENTER);
             startButton.setVerticalTextPosition(SwingConstants.CENTER);
-            // startButton.setBorderPainted(false);
-            // startButton.setContentAreaFilled(false);
-                    // Border emptyBorder = BorderFactory.createEmptyBorder();
             startButton.setBorder(null);
             homeScreen.add(startButton, gbc);
             homeScreen.repaint();
@@ -260,10 +314,11 @@ for (int i = 0; i < STAR_COUNT; i++) {
 
                 JPanel buttonPanel = new JPanel();
                 buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
-                buttonPanel.setBackground(new Color(42, 44, 52));
+                buttonPanel.setBackground(new Color(0, 0, 0, 0));
+                buttonPanel.setOpaque(false);
                 buttonPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-                RoundButton launchButton = styleRoundedButton("Launch", new Color(244, 232, 255), new Color(45, 45, 60), 18);
+                RoundButton launchButton = styleRoundedButton("Launch", new Color(166, 225, 250), new Color(25, 25, 35), 18);
                 launchButton.setAlignmentX(Component.LEFT_ALIGNMENT);
                 launchButton.setMaximumSize(new java.awt.Dimension(260, 58));
                 launchButton.setFont(new Font("SansSerif", Font.BOLD, 22));
@@ -308,7 +363,7 @@ for (int i = 0; i < STAR_COUNT; i++) {
                     icon.setImage(icon.getImage().getScaledInstance(80, 80, Image.SCALE_DEFAULT));
                     RotatableLabel simRocket = new RotatableLabel(icon);
                     simRocket.setSize(100, 100);
-                    simRocket.setLocation(rocketBaseX, rocketBaseY - simRocket.getHeight() + 40);
+                    simRocket.setLocation(rocketBaseX, rocketBaseY - simRocket.getHeight() + 24);
 
                     SimPanel pan = new SimPanel();
                     pan.setBounds(0, 0, screenSize.width, screenSize.height);
@@ -377,10 +432,8 @@ modelPreview.setHorizontalAlignment(JLabel.CENTER);
 modelPreview.setVerticalAlignment(JLabel.CENTER);
 modelPreview.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
 
-// Put the preview and stats next to each other
 JPanel previewContainer = new JPanel(new BorderLayout(15, 0));
 previewContainer.setOpaque(false);
-
 previewContainer.add(modelPreview, BorderLayout.CENTER);
 
 JPanel statsPanel = new JPanel();
@@ -416,7 +469,6 @@ previewPanel.add(previewContainer);
                     ImageIcon iconPreview = new ImageIcon(selectedModel.imgPath);
                     Image scaled = iconPreview.getImage().getScaledInstance(550, 550, Image.SCALE_SMOOTH);
                     modelPreview.setIcon(new ImageIcon(scaled));
-                    // Update rocket stats
 statsTitle.setText(selectedModel.name());
 heightLabel.setText("Height: " + selectedModel.height);
 widthLabel.setText("Width: " + selectedModel.width);
@@ -425,7 +477,6 @@ cdLabel.setText("Drag Coefficient: " + selectedModel.cd);
                 };
                 updateModelPreview.run();
                 modelCombo.addActionListener(ea -> updateModelPreview.run());
-                // Hover glow and stats display
 java.awt.event.MouseAdapter hoverListener = new java.awt.event.MouseAdapter() {
     @Override
     public void mouseEntered(java.awt.event.MouseEvent e) {
@@ -449,7 +500,6 @@ java.awt.event.MouseAdapter hoverListener = new java.awt.event.MouseAdapter() {
             mouse, previewContainer
         );
 
-        // Only hide when the mouse leaves the preview AND stats area
         if (!previewContainer.contains(mouse)) {
             statsPanel.setVisible(false);
             modelPreview.setBorder(
@@ -772,7 +822,7 @@ statsPanel.addMouseListener(hoverListener);
 
             int groundY = Math.max(220, screenSize.height - 220);
             int rocketBaseX = 120;
-            int rocketBaseY = groundY - 30;
+            int rocketBaseY = groundY;
 
             JLabel launchLabel = new JLabel("Custom Rocket Flight");
             launchLabel.setForeground(new Color(245, 240, 255));
@@ -785,14 +835,13 @@ statsPanel.addMouseListener(hoverListener);
             alt.setBounds(50, 50, 200, 50);
             launchPanel.add(alt);
 
-            ImageIcon icon = new ImageIcon("Assets/alpha3.png");
-            if (!(new java.io.File("Assets/alpha3.png").exists())) {
-                icon = new ImageIcon("Assets/tomahawk.png");
-            }
-            icon.setImage(icon.getImage().getScaledInstance(80, 80, Image.SCALE_DEFAULT));
+            ImageIcon icon = buildCustomRocketIcon(customRocketMaker);
+            int targetW = 68;
+            int targetH = 92;
+            icon.setImage(icon.getImage().getScaledInstance(targetW, targetH, Image.SCALE_SMOOTH));
             RotatableLabel simRocket = new RotatableLabel(icon);
-            simRocket.setSize(100, 100);
-            simRocket.setLocation(rocketBaseX, rocketBaseY - simRocket.getHeight() + 40);
+            simRocket.setSize(targetW, targetH);
+            simRocket.setLocation(rocketBaseX, rocketBaseY - simRocket.getHeight() + 24);
 
             SimPanel pan = new SimPanel();
             pan.setBounds(0, 0, screenSize.width, screenSize.height);
@@ -804,9 +853,9 @@ statsPanel.addMouseListener(hoverListener);
             JLabel customAngleLabel = new JLabel("Launch Angle: 20°");
             customAngleLabel.setForeground(new Color(245, 240, 255));
             customAngleLabel.setFont(new Font("SansSerif", Font.PLAIN, 16));
-            customAngleLabel.setBounds(screenSize.width - 320, Math.max(120, groundY - 120), 220, 30);
+            customAngleLabel.setBounds(screenSize.width - 320, 150, 220, 30);
 
-            JSlider customAngleSlider = createLaunchAngleSlider(screenSize.width - 320, Math.max(150, groundY - 90), 220, 20);
+            JSlider customAngleSlider = createLaunchAngleSlider(screenSize.width - 320, 180, 220, 20);
             bindLaunchAngleLabel(customAngleLabel, customAngleSlider);
 
             RoundButton relaunchButton = createReplayButton(screenSize.width - 180, 20, 140, 40);
@@ -819,22 +868,14 @@ statsPanel.addMouseListener(hoverListener);
                 runCustomRocketSim(customRocket, launchPanel, simRocket, alt, pan, exitButton, angle, relaunchButton);
             });
 
-            JButton launchButton = styleRoundedButton("Launch", new Color(244, 232, 255), new Color(45, 45, 60), 18);
-            launchButton.setBounds(600, 600, 140, 50);
-            launchButton.addActionListener(evt -> {
-                int angle = customAngleSlider.getValue();
-                runCustomRocketSim(customRocket, launchPanel, simRocket, alt, pan, exitButton, angle, relaunchButton);
-            });
-
             launchPanel.add(pan);
             launchPanel.add(simRocket);
             launchPanel.add(launchLabel);
             launchPanel.add(alt);
+            launchPanel.add(exitButton);
             launchPanel.add(customAngleLabel);
             launchPanel.add(customAngleSlider);
-            launchPanel.add(exitButton);
             launchPanel.add(relaunchButton);
-            launchPanel.add(launchButton);
 
             launchPanel.setComponentZOrder(pan, launchPanel.getComponentCount() - 1);
 
@@ -950,7 +991,7 @@ statsPanel.addMouseListener(hoverListener);
                     double worldMaxY = Math.max(150.0, pan.yMax);
                     int panelWidth = panel.getWidth() > 0 ? panel.getWidth() : 1200;
                     int panelHeight = panel.getHeight() > 0 ? panel.getHeight() : 800;
-                    int groundY = panelHeight - 120;
+                    int groundY = panelHeight - 175;
                     int marginX = 120;
                     int marginY = 90;
 
@@ -1110,7 +1151,7 @@ statsPanel.addMouseListener(hoverListener);
                     double worldMaxY = Math.max(150.0, pan.yMax);
                     int panelWidth = panel.getWidth() > 0 ? panel.getWidth() : 1200;
                     int panelHeight = panel.getHeight() > 0 ? panel.getHeight() : 800;
-                    int groundY = panelHeight - 120;
+                    int groundY = panelHeight - 175;
                     int marginX = 120;
                     int marginY = 90;
 
