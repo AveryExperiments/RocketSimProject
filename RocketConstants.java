@@ -7,8 +7,8 @@ public class RocketConstants {
     int fuel;
 
     public enum rocketModel {
-        Tomahawk("Assets/tomahawk.png", 1.0, 0.05, 0.5, 0.45),
-        Alpha3("Assets/alpha3.png", 0.312, 0.0254, 0.7, 0.60);
+        Tomahawk("/home/kasm-user/RocketProject/RocketSimProject/Assets/Tomahawk.png", 1.0, 0.05, 0.5, 0.45),
+        Alpha3("/home/kasm-user/RocketProject/RocketSimProject/Assets/Alpha3.png", 0.312, 0.0254, 0.7, 0.60);
 
         public final String imgPath;
         public final double height;

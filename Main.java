@@ -161,8 +161,8 @@ for (int i = 0; i < STAR_COUNT; i++) {
             // frame.add(stars, BorderLayout.CENTER);
 
             JLabel titleImage = null;
-            if (new java.io.File("Assets/Title.png").exists()) {
-                ImageIcon titleIcon = new ImageIcon("Assets/Title.png");
+            if (new java.io.File("/home/kasm-user/RocketProject/RocketSimProject/Assets/Title.png").exists()) {
+                ImageIcon titleIcon = new ImageIcon("/home/kasm-user/RocketProject/RocketSimProject/Assets/Title.png");
                 // Image scaledTitle = titleIcon.getImage().getScaledInstance(, 180, Image.SCALE_SMOOTH);
                 titleImage = new JLabel(new ImageIcon(titleIcon.getImage().getScaledInstance(titleIcon.getIconWidth()/2, titleIcon.getIconHeight()/2, Image.SCALE_SMOOTH)));
                 // titleImageGlow = new JLabel(new ImageIcon(titleIcon.getImage().getScaledInstance(titleIcon.getIconWidth()*2, titleIcon.getIconHeight()*2, Image.SCALE_SMOOTH)));
@@ -190,11 +190,11 @@ for (int i = 0; i < STAR_COUNT; i++) {
             // title.setBounds(120, 720, 780, 200);
             // title.setHorizontalAlignment(JLabel.CENTER);
             // homeScreen.add(title);
-            ImageIcon starButtonDefault= new ImageIcon("C:\\Users\\awart\\Desktop\\rocket\\Assets\\starbutton (1).png");
+            ImageIcon starButtonDefault= new ImageIcon("/home/kasm-user/RocketProject/RocketSimProject/Assets/starbutton (1).png");
             int width= starButtonDefault.getIconWidth()/5 ;
             int height= starButtonDefault.getIconHeight()/5;
             ImageIcon scaledStarButtonDefault= new ImageIcon(starButtonDefault.getImage().getScaledInstance( width, height,Image.SCALE_SMOOTH));
-            ImageIcon starButtonHover= new ImageIcon("C:\\Users\\awart\\Desktop\\rocket\\Assets\\starbutton.png");
+            ImageIcon starButtonHover= new ImageIcon("/home/kasm-user/RocketProject/RocketSimProject/Assets/starbutton.png");
             ImageIcon scaledStarButtonHover= new ImageIcon(starButtonHover.getImage().getScaledInstance( width, height,Image.SCALE_SMOOTH));
             
             JButton startButton = new JButton("<html><div style='text-shadow: -8px -8px 0 #000000, 8px -8px 0 #000000, -8px 8px 0 #000000, 8px 8px 0 #000000; font-weight: bold;'>Start</div></html>", scaledStarButtonDefault);
@@ -263,10 +263,11 @@ for (int i = 0; i < STAR_COUNT; i++) {
                 buttonPanel.setBackground(new Color(42, 44, 52));
                 buttonPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-                RoundButton launchButton = styleRoundedButton("Launch", new Color(244, 232, 255), new Color(45, 45, 60), 18);
+                RoundButton launchButton = styleRoundedButton("Launch Screen", new Color(244, 232, 255), new Color(45, 45, 60), 18);
                 launchButton.setAlignmentX(Component.LEFT_ALIGNMENT);
                 launchButton.setMaximumSize(new java.awt.Dimension(260, 58));
                 launchButton.setFont(new Font("SansSerif", Font.BOLD, 22));
+                launchButton.setBackground(null);
                 launchButton.addActionListener(evt -> {
                     RocketConstants.rocketModel selectedModel = (RocketConstants.rocketModel) modelCombo.getSelectedItem();
                     if (selectedModel == null) {
@@ -336,7 +337,7 @@ for (int i = 0; i < STAR_COUNT; i++) {
                         rocket.setLaunch(simAngleSlider.getValue());
                         pan.clearTrajectory();
                         runRegularRocketSim(rocket, launchPanel, simRocket, alt, pan, exitButton, relaunchButton, simAngleSlider);
-                    });
+});                                                                                                             
 
                     launchPanel.add(pan);
                     launchPanel.add(simRocket);
