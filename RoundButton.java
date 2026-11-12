@@ -4,15 +4,17 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.Shape;
 import java.awt.geom.RoundRectangle2D;
+import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.border.EmptyBorder;
 
 public class RoundButton extends JButton {
-    private Color buttonColor = new Color(70, 130, 180);
-    private Color hoverColor = new Color(90, 150, 210);
-    private Color pressedColor = new Color(50, 100, 160);
-    private Color textColor = Color.WHITE;
+    private Color buttonColor = new Color(166, 225, 250);
+    private Color hoverColor = new Color(186, 235, 255);
+    private Color pressedColor = new Color(146, 205, 230);
+    private Color textColor = new Color(25, 25, 35);
     private int radius = 20;
 
     public RoundButton() {
@@ -20,15 +22,15 @@ public class RoundButton extends JButton {
     }
 
     public RoundButton(String text) {
-        this(text, new Color(70, 130, 180), 20);
+        this(text, new Color(166, 225, 250), 20);
     }
 
     public RoundButton(String text, int radius) {
-        this(text, new Color(70, 130, 180), radius);
+        this(text, new Color(166, 225, 250), radius);
     }
 
     public RoundButton(String text, Color buttonColor, int radius) {
-        this(text, buttonColor, Color.WHITE, new Font("SansSerif", Font.BOLD, 14), radius);
+        this(text, buttonColor, new Color(25, 25, 35), new Font("SansSerif", Font.BOLD, 14), radius);
     }
 
     public RoundButton(String text, Color buttonColor, Color textColor, Font font, int radius) {
@@ -49,14 +51,12 @@ public class RoundButton extends JButton {
 
     public void setButtonColor(Color buttonColor) {
         this.buttonColor = buttonColor;
-        super.setBackground(buttonColor);
         repaint();
     }
 
     @Override
     public void setBackground(Color bg) {
         this.buttonColor = bg;
-        super.setBackground(bg);
         repaint();
     }
 
@@ -96,11 +96,30 @@ public class RoundButton extends JButton {
             fillColor = hoverColor;
         }
 
+        Shape shape = new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), radius, radius);
         g2.setColor(fillColor);
-        g2.fill(new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), radius, radius));
-        g2.dispose();
+        g2.fill(shape);
 
-        super.paintComponent(g);
+        Icon icon = getIcon();
+        if (icon != null) {
+            int iconX = (getWidth() - icon.getIconWidth()) / 2;
+            int iconY = (getHeight() - icon.getIconHeight()) / 2;
+            icon.paintIcon(this, g2, iconX, iconY);
+        }
+
+        String text = getText();
+        if (text != null && !text.trim().isEmpty()) {
+            String plainText = text.replaceAll("<.*?>", "");
+            if (!plainText.isEmpty()) {
+                g2.setColor(getForeground());
+                int textWidth = g2.getFontMetrics().stringWidth(plainText);
+                int x = (getWidth() - textWidth) / 2;
+                int y = (getHeight() + g2.getFontMetrics().getAscent()) / 2 - 2;
+                g2.drawString(plainText, x, y);
+            }
+        }
+
+        g2.dispose();
     }
 
     @Override
